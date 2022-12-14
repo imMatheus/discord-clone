@@ -4,6 +4,6 @@ import { MessageController } from './message.controller';
 
 @Module({
   controllers: [MessageController],
-  providers: [MessageService]
+  providers: [MessageService],
 })
 export class MessageModule {}
