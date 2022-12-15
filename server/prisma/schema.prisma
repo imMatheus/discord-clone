@@ -1,35 +1,90 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Account {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String @unique
-  user     User   @relation(fields: [userId], references: [id])
-  email    String @unique
-  password String
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  password  String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([userId, email])
 }
 
 model User {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  hash       Int       @unique
+  id         String         @id @default(cuid())
+  name       String         @db.VarChar(50)
+  hash       String         @unique @db.VarChar(6)
   avatar_url String
+  account    Account?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @default(now()) @updatedAt
+  servers    ServerMember[]
   messages   Message[]
-  Account    Account?
+
+  @@unique([name, hash])
+  @@index([name, hash])
+}
+
+model Server {
+  id        String         @id @default(cuid())
+  name      String         @db.VarChar(100)
+  members   ServerMember[]
+  channels  Channel[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @default(now()) @updatedAt
+}
+
+model ServerMember {
+  id        String   @id @default(cuid())
+  serverId  String
+  server    Server   @relation(fields: [serverId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([userId])
+  @@index([serverId])
+}
+
+enum ChannelEnum {
+  CHAT
+  VOICE
+}
+
+model Channel {
+  id           String      @id @default(cuid())
+  name         String
+  channel_type ChannelEnum @default(CHAT)
+  server       Server      @relation(fields: [serverId], references: [id])
+  serverId     String
+  messages     Message[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+
+  @@index([serverId])
 }
 
 model Message {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  user    User   @relation(fields: [userId], references: [id])
-  userId  String @db.ObjectId
-  message String
+  id        String   @id @default(cuid())
+  text      String
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  channelId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([channelId])
+  @@index([userId])
 }
