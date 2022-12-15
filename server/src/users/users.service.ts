@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma.service';
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   create(createUserDto: CreateUserDto) {
@@ -16,8 +16,25 @@ export class UserService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findAccountForUser(email: string) {
+    return this.prisma.account.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        password: true,
+        email: true,
+        userId: true,
+      },
+    });
+  }
+
+  findOne(id: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
