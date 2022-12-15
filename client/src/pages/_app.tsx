@@ -1,8 +1,9 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import Sidebar from '@/components/Sidebar';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import Sidebar from '@/components/Sidebar';
+import ChannelsSidebar from '@/components/ChannelsSidebar';
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,8 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <div className="flex h-screen">
         <Sidebar />
+        <ChannelsSidebar />
+
         <div className="flex-1">
           <Component {...pageProps} />
         </div>
